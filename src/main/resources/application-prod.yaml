@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/taskdb}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:task_user}
+    password: ${DB_PASSWORD:task_password}
+
+  h2:
+    console:
+      enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+
+server:
+  port: 9090

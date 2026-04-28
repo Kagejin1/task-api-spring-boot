@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: task-api-db
+    environment:
+      POSTGRES_DB: taskdb
+      POSTGRES_USER: task_user
+      POSTGRES_PASSWORD: task_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - task-api-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U task_user -d taskdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  task-api:
+    build:
+      context: .
+    container_name: task-api-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/taskdb
+      DB_USERNAME: task_user
+      DB_PASSWORD: task_password
+    ports:
+      - "9090:9090"
+
+volumes:
+  task-api-db-data:
