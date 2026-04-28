@@ -75,4 +75,8 @@ La API queda disponible en `http://localhost:9090`.
 ```
 
 ## CI
-Se incluye workflow en `.github/workflows/ci.yml` para ejecutar tests automaticamente en `push` y `pull_request` sobre `main`.
+Se incluye workflow en `.github/workflows/ci.yml` con ejecucion automatica en `push` y `pull_request` sobre `main`, con estos stages:
+- `test`: ejecuta `./mvnw test`.
+- `static-analysis`: ejecuta `./mvnw -DskipTests pmd:check`.
+- `package`: ejecuta `./mvnw -DskipTests package` y publica el JAR como artifact.
+- `docker-build`: construye la imagen Docker para validar el runtime containerizado.
