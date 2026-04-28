@@ -1,9 +1,20 @@
 package cl.kagejin.taskapi.controller;
 
 import cl.kagejin.taskapi.dto.ApiResponse;
-import cl.kagejin.taskapi.model.Task;
-import cl.kagejin.taskapi.repository.TaskRepository;
-import org.springframework.web.bind.annotation.*;
+import cl.kagejin.taskapi.dto.TaskRequest;
+import cl.kagejin.taskapi.dto.TaskResponse;
+import cl.kagejin.taskapi.service.TaskService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -11,44 +22,38 @@ import java.util.List;
 @RequestMapping("/tasks")
 public class TaskController {
 
-    private final TaskRepository taskRepository;
+    private final TaskService taskService;
 
-    public TaskController(TaskRepository taskRepository) {
-        this.taskRepository = taskRepository;
+    public TaskController(TaskService taskService) {
+        this.taskService = taskService;
     }
 
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public List<TaskResponse> getAllTasks() {
+        return taskService.getAllTasks();
     }
 
     @PostMapping
-    public ApiResponse<Task> createTask(@RequestBody Task task) {
-        Task savedTask = taskRepository.save(task);
-        return new ApiResponse<>("Tarea creada", savedTask);
+    public ResponseEntity<ApiResponse<TaskResponse>> createTask(@Valid @RequestBody TaskRequest taskRequest) {
+        TaskResponse createdTask = taskService.createTask(taskRequest);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>("Tarea creada", createdTask));
     }
 
     @GetMapping("/{id}")
-    public Task getTaskById(@PathVariable Long id) {
-        return taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task no encontrada"));
+    public TaskResponse getTaskById(@PathVariable Long id) {
+        return taskService.getTaskById(id);
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<String> deleteTask(@PathVariable Long id) {
-        taskRepository.deleteById(id);
+    public ApiResponse<Void> deleteTask(@PathVariable Long id) {
+        taskService.deleteTask(id);
         return new ApiResponse<>("Tarea " + id + " eliminada", null);
     }
 
     @PutMapping("/{id}")
-    public Task updateTask(@PathVariable Long id, @RequestBody Task updatedTask) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task no encontrada"));
-
-        task.setTitle(updatedTask.getTitle());
-        task.setDescription(updatedTask.getDescription());
-        task.setCompleted(updatedTask.isCompleted());
-
-        return taskRepository.save(task);
+    public ApiResponse<TaskResponse> updateTask(@PathVariable Long id, @Valid @RequestBody TaskRequest taskRequest) {
+        TaskResponse updatedTask = taskService.updateTask(id, taskRequest);
+        return new ApiResponse<>("Tarea actualizada", updatedTask);
     }
 }

@@ -2,8 +2,8 @@ package cl.kagejin.taskapi.dto;
 
 public class ApiResponse<T> {
 
-    private String message;
-    private T data;
+    private final String message;
+    private final T data;
 
     public ApiResponse(String message, T data) {
         this.message = message;
